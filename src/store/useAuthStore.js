@@ -20,15 +20,39 @@ export const useAuthStore = create((set, get) => ({
       user: null,
     }),
 
+  isLoggedIn: () => {
+    return get().user !== null
+  },
+
+  isUserInLibrary: () => {
+    const { user, libraryUsers } = get()
+    if (!user) return false
+    return libraryUsers.some((u) => u.email === user.email)
+  },
+
   bookSlot: (data) => {
-    const { libraryUsers, user } = get()
-    if (!user) return
+    const { user, libraryUsers, maxSlots } = get()
+
+    if (!user) return { success: false, message: "Not logged in" }
+
+    if (libraryUsers.length >= maxSlots)
+      return { success: false, message: "No slots available" }
 
     const exists = libraryUsers.find((u) => u.email === user.email)
-    if (exists) return
+    if (exists)
+      return { success: false, message: "Already booked" }
 
     set({
-      libraryUsers: [...libraryUsers, { ...data, email: user.email }],
+      libraryUsers: [
+        ...libraryUsers,
+        {
+          ...data,
+          email: user.email,
+          name: user.name,
+        },
+      ],
     })
+
+    return { success: true }
   },
 }))

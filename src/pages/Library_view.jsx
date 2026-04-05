@@ -1,9 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Library_view() {
-  const { user, libraryUsers, maxSlots, bookSlot } = useAuthStore();
+  const navigate = useNavigate();
+
+  const { user, libraryUsers, maxSlots, bookSlot, isUserInLibrary } =
+    useAuthStore();
 
   const [open, setOpen] = useState(false);
   const [studentId, setStudentId] = useState("");
@@ -12,18 +16,43 @@ function Library_view() {
   const [fromPeriod, setFromPeriod] = useState("AM");
   const [toPeriod, setToPeriod] = useState("PM");
 
-  const isRegistered = libraryUsers.find((u) => u.email === user?.email);
-
   const availableSlots = maxSlots - libraryUsers.length;
+  const isRegistered = isUserInLibrary();
+
+  // 🔐 HANDLE BOOK CLICK
+  const handleBookClick = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setOpen(true);
+  };
 
   const handleSubmit = () => {
-    bookSlot({ studentId, fromTime, toTime, fromPeriod, toPeriod });
+    if (!studentId || !fromTime || !toTime) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const res = bookSlot({
+      studentId,
+      fromTime,
+      toTime,
+      fromPeriod,
+      toPeriod,
+    });
+
+    if (!res.success) {
+      alert(res.message);
+      return;
+    }
+
     setOpen(false);
   };
 
   return (
     <div className="min-h-screen bg-black text-white px-6 py-10">
-      {/* 🔥 TOP HEADER (OUTSIDE CARD) */}
+      {/* HEADER */}
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
           BTech Library
@@ -39,7 +68,7 @@ function Library_view() {
         </p>
       </div>
 
-      {/* MAIN CARD */}
+      {/* CARD */}
       <div className="flex justify-center">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -74,14 +103,14 @@ function Library_view() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setOpen(true)}
+                onClick={handleBookClick}
                 className="px-8 py-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold shadow-lg"
               >
                 📚 Book a Slot in Library
               </motion.button>
             ) : (
               <div className="px-6 py-3 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 font-medium">
-                ✅ You already have a slot booked
+                ✅ Slot Booked Successfully
               </div>
             )}
           </div>
@@ -106,13 +135,12 @@ function Library_view() {
               <h2 className="text-xl font-semibold mb-4">Book Your Slot</h2>
 
               <div className="flex flex-col gap-4">
-                {/* Student ID */}
                 <input
                   type="text"
                   placeholder="Enter Student ID"
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
-                  className="px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:outline-none focus:border-blue-500"
+                  className="px-4 py-2 rounded-lg bg-black/40 border border-white/10"
                 />
 
                 {/* FROM */}
@@ -121,7 +149,7 @@ function Library_view() {
                     type="time"
                     value={fromTime}
                     onChange={(e) => setFromTime(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:outline-none"
+                    className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10"
                   />
                   <select
                     value={fromPeriod}
@@ -139,7 +167,7 @@ function Library_view() {
                     type="time"
                     value={toTime}
                     onChange={(e) => setToTime(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:outline-none"
+                    className="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10"
                   />
                   <select
                     value={toPeriod}
@@ -151,7 +179,6 @@ function Library_view() {
                   </select>
                 </div>
 
-                {/* SUBMIT */}
                 <button
                   onClick={handleSubmit}
                   className="mt-3 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600"
