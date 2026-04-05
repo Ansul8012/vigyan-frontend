@@ -9,7 +9,7 @@ import LibraryView from "./pages/Library_view";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+    <div className="min-h-screen bg-linear-to-br from-black via-gray-900 to-black text-white">
       <Navbar />
       <div className="pt-24">
         <Routes>
