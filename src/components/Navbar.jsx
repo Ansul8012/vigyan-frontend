@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useEffect, useState } from "react";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -26,73 +27,115 @@ const Navbar = () => {
   const formattedTime = time.toLocaleTimeString();
   const formattedDate = time.toLocaleDateString();
 
+  const isActive = (path) => location.pathname === path;
+
   return (
     <motion.nav
-      initial={{ y: -70, opacity: 0 }}
+      initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      className="fixed w-full z-50 backdrop-blur-xl bg-black/60 border-b border-blue-500/20 shadow-lg"
+      transition={{ duration: 0.5 }}
+      className="fixed top-0 w-full z-50 backdrop-blur-xl bg-black/70 border-b border-white/10"
     >
-      <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-        {/* Left */}
-        <Link to="/" className="flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        {/* LEFT: BRAND */}
+        <Link to="/" className="flex items-center gap-3 group">
           <img
             src="/logo.png"
             alt="logo"
-            className="w-10 h-10 rounded-full object-cover border border-blue-500/40 shadow-md"
+            className="w-10 h-10 rounded-full border border-blue-500/40 group-hover:scale-105 transition"
           />
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent tracking-wide">
-            Vigyan
-          </h1>
+
+          <div className="flex flex-col leading-tight">
+            <span className="text-xl font-bold tracking-wide bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              Vigyan
+            </span>
+            <span className="text-[11px] text-purple-400 tracking-wider">
+              AI Powered Library
+            </span>
+          </div>
         </Link>
 
-        {/* Center */}
-        <motion.div
-          animate={{
-            textShadow: [
-              "0 0 5px #3b82f6",
-              "0 0 15px #8b5cf6",
-              "0 0 5px #3b82f6",
-            ],
-          }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="ml-28 text-xl font-semibold tracking-widest bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400 bg-clip-text text-transparent"
-        >
-          AI Digital Library
-        </motion.div>
+        {/* CENTER: PRIMARY ACTION */}
+        <div className="flex items-center">
+          <Link
+            to="/library_view"
+            className="relative group px-7 py-2.5 rounded-full text-sm font-semibold tracking-wide transition-all duration-300"
+          >
+            {/* Glow Layer */}
+            <span className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-70 blur-md group-hover:opacity-100 transition duration-300"></span>
 
-        {/* Right */}
-        <div className="flex items-center gap-4 ml-20">
+            {/* Button */}
+            <span
+              className={`relative z-10 flex items-center gap-2 px-6 py-2 rounded-full border transition-all duration-300 ${
+                isActive("/library_view")
+                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white border-transparent shadow-lg"
+                  : "bg-black/40 text-gray-200 border-white/10 group-hover:border-blue-400 group-hover:text-white"
+              }`}
+            >
+              📚 View Library
+            </span>
+
+            {/* Shine Effect (inline animation) */}
+            <span className="absolute inset-0 rounded-full overflow-hidden">
+              <span
+                className="absolute top-0 left-[-75%] w-[50%] h-full bg-white/10 skew-x-12 opacity-0 group-hover:opacity-100"
+                style={{
+                  animation: "shine 1.5s linear",
+                }}
+              ></span>
+            </span>
+
+            {/* Inline Keyframes */}
+            <style>
+              {`
+        @keyframes shine {
+          0% { left: -75%; }
+          100% { left: 125%; }
+        }
+      `}
+            </style>
+          </Link>
+        </div>
+
+        {/* RIGHT */}
+        <div className="flex items-center gap-6">
+          {/* TIME */}
+          <div className="hidden md:flex flex-col items-end text-xs text-gray-400 leading-tight">
+            <span>{formattedDate}</span>
+            <span className="text-blue-400 font-medium">{formattedTime}</span>
+          </div>
+
+          {/* AUTH */}
           {!user ? (
-            <>
+            <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="px-5 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:scale-105 transition-transform duration-300"
+                className="px-4 py-1.5 text-sm rounded-full text-white bg-white/10 hover:bg-white/20 transition"
               >
                 Login
               </Link>
 
               <Link
                 to="/signup"
-                className="px-5 py-1.5 rounded-full border border-blue-500 text-blue-400 hover:bg-blue-500/10 transition duration-300"
+                className="px-4 py-1.5 text-sm rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow hover:scale-105 transition"
               >
-                Signup
+                Get Started
               </Link>
-            </>
+            </div>
           ) : (
-            <button
-              onClick={handleLogout}
-              className="px-5 py-1.5 rounded-full bg-red-500/80 hover:bg-red-600 transition duration-300 shadow-md"
-            >
-              Logout
-            </button>
-          )}
+            <div className="flex items-center gap-3">
+              <div className="px-3 py-1 rounded-full bg-white/5 text-xs text-gray-300 border border-white/10">
+                {user?.name || "User"}
+              </div>
 
-          {/* Clock */}
-          <div className="px-4 py-2 rounded-lg bg-black/40 border border-blue-500/30 shadow-inner backdrop-blur-md text-blue-400 font-mono text-sm text-center min-w-[130px]">
-            <div>{formattedDate}</div>
-            <div className="text-base font-semibold">{formattedTime}</div>
-          </div>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-1.5 text-sm rounded-full bg-red-500/80 hover:bg-red-600 transition"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </motion.nav>
