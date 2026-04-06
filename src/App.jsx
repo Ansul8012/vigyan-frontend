@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import Issue from "./pages/Issue";
 import Return from "./pages/Return";
 import LibraryView from "./pages/Library_view";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/issue" element={<Issue />} />
           <Route path="/return" element={<Return />} />
           <Route path="/library_view" element={<LibraryView />}></Route>
+          <Route path="/dashboard" element={<Dashboard />}></Route>
         </Routes>
       </div>
     </div>

@@ -5,23 +5,63 @@ export const useAuthStore = create((set, get) => ({
   libraryUsers: [],
   maxSlots: 50,
 
+  authStatus: "idle", // idle | scanning | success | error
+  authError: null,
+
   login: (userData) =>
     set({
       user: userData,
-    }),
-
-  signup: (userData) =>
-    set({
-      user: userData,
+      authStatus: "success",
+      authError: null,
     }),
 
   logout: () =>
     set({
       user: null,
+      authStatus: "idle",
     }),
 
-  isLoggedIn: () => {
-    return get().user !== null
+  // 🔐 FACE AUTH (MOCK)
+  faceAuth: async () => {
+    set({ authStatus: "scanning", authError: null })
+
+    try {
+      // ================= BACKEND INTEGRATION =================
+      // 1. Capture frame from frontend
+      // 2. Send to backend (face recognition API)
+      // 3. Backend returns user or error
+      // ======================================================
+
+      await new Promise((res) => setTimeout(res, 2000))
+
+      // 🧠 Dummy logic (simulate success/failure)
+      const isUserFound = Math.random() > 0.4
+
+      if (!isUserFound) {
+        set({
+          authStatus: "error",
+          authError:
+            "User not found with this face. Please register first.",
+        })
+        return
+      }
+
+      const userData = {
+        name: "Ansul Singh",
+        email: "ansul@example.com",
+      }
+
+      set({
+        user: userData,
+        authStatus: "success",
+        authError: null,
+      })
+    } catch (err) {
+      set({
+        authStatus: "error",
+        authError: "Authentication failed. Try again.",
+      })
+    }
   },
 
   isUserInLibrary: () => {
@@ -33,23 +73,18 @@ export const useAuthStore = create((set, get) => ({
   bookSlot: (data) => {
     const { user, libraryUsers, maxSlots } = get()
 
-    if (!user) return { success: false, message: "Not logged in" }
+    if (!user) return { success: false }
 
     if (libraryUsers.length >= maxSlots)
-      return { success: false, message: "No slots available" }
+      return { success: false }
 
     const exists = libraryUsers.find((u) => u.email === user.email)
-    if (exists)
-      return { success: false, message: "Already booked" }
+    if (exists) return { success: false }
 
     set({
       libraryUsers: [
         ...libraryUsers,
-        {
-          ...data,
-          email: user.email,
-          name: user.name,
-        },
+        { ...data, email: user.email, name: user.name },
       ],
     })
 
